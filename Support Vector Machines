@@ -1,0 +1,140 @@
+# Support Vector Machines
+
+This code is organised as follows: 
+First, each model is trained (training time is calculated and displayed) and validation performance is computed.
+Second, validation set performance is compared.
+Third, the test set performance is computed and confusion matrix is displayed. 
+Finally, the top ten most important features are identified and stored.
+
+## Model 1
+```{r}
+set.seed(123)
+start.time <- Sys.time()
+
+svmmod1 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
+              type="C-classification", cost = 100, probability = TRUE)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+svm_pred1 <- predict(svmmod1, newdata=validation_set, probability = TRUE)
+svm_prob_pred1 <- attr(svm_pred1, "probabilities")[,2]
+
+val_metrics_svm1 <- perf_met_fu(svm_prob_pred1, actual_class_validation)
+```
+
+
+## Model 2
+
+```{r}
+set.seed(123)
+start.time <- Sys.time()
+
+svmmod2 = svm(Default_next_12_months ~ ., data = train_set, 
+              kernel = "polynomial", degree=3, type="C-classification", 
+              cost = 20, probability = TRUE)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+svm_pred2 <- predict(svmmod2, newdata=validation_set, probability = TRUE)
+svm_prob_pred2 <- attr(svm_pred2, "probabilities")[,2]
+
+val_metrics_svm2 <- perf_met_fu(svm_prob_pred2, actual_class_validation)
+val_metrics_svm2[1] <- 1- val_metrics_svm2[1] #curve was flipped for some reason
+```
+
+
+
+## Model 3
+
+```{r}
+set.seed(123)
+start.time <- Sys.time()
+
+svmmod3 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
+              type="C-classification", cost = 10, probability = TRUE)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+svm_pred3 <- predict(svmmod3, newdata=validation_set, probability = TRUE)
+svm_prob_pred3 <- attr(svm_pred3, "probabilities")[,2]
+
+val_metrics_svm3 <- perf_met_fu(svm_prob_pred3, actual_class_validation)
+```
+
+
+
+
+## Model 4
+
+```{r}
+set.seed(123)
+start.time <- Sys.time()
+
+svmmod4 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial",
+              type="C-classification", cost = 50, probability = TRUE)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+svm_pred4 <- predict(svmmod4, newdata=validation_set, probability = TRUE)
+svm_prob_pred4 <- attr(svm_pred4, "probabilities")[,2]
+
+val_metrics_svm4 <- perf_met_fu(svm_prob_pred4, actual_class_validation)
+```
+
+
+
+
+## Validation set comparison
+
+```{r}
+models <- c("SVM1", "SVM2", "SVM3", "SVM4")
+
+results_tableSVM <- data.frame(
+  Model = models,
+  AUC = c(val_metrics_svm1[1], val_metrics_svm2[1], val_metrics_svm3[1], val_metrics_svm4[1]),
+  PR_AUC = c(val_metrics_svm1[2], val_metrics_svm2[2], val_metrics_svm3[2], val_metrics_svm4[2]),
+  Brier_Score = c(val_metrics_svm1[3], val_metrics_svm2[3], val_metrics_svm3[3], val_metrics_svm4[3])
+)
+
+results_tableSVM
+```
+
+
+## Performance on test set
+
+```{r}
+test_pred_SVM <- predict(svmmod1, newdata=test_set, probability = TRUE)
+test_prob_pred_SVM <- attr(test_pred_SVM, "probabilities")[,2]
+
+test_metrics_svm <- perf_met_fu(test_prob_pred_SVM, actual_class_test)
+
+optimal_threshold_SVM <- opt_thres_fu(test_prob_pred_SVM, actual_class_test)
+test_class_pred_SVM <- ifelse(test_prob_pred_SVM > as.numeric(optimal_threshold_SVM)[1], 1, 0)
+
+confusion_matrix_SVM <- cm_fu(test_class_pred_SVM, actual_class_test)
+print(confusion_matrix_SVM)
+```
+
+
+## Interpretability/Variable importance
+
+```{r}
+X_test_SVM <- test_set[, -1]
+
+set.seed(123)
+predictor_SVM <- Predictor$new(svmmod1, data = X_test_SVM, 
+                           y = test_set$Default_next_12_months, type = "prob")
+
+imp_SVM <- FeatureImp$new(predictor_SVM, loss = "ce") # cross-entropy loss 
+
+imp_SVM_top10 <- head(imp_SVM$results[,c(1,3,5)], 10)
+print(imp_SVM_top10)
+```
