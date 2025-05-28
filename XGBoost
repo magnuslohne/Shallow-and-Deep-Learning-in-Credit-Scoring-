@@ -1,0 +1,209 @@
+# XGBoost
+
+This code is organised as follows: 
+First, each model is trained (training time is calculated and displayed) and validation performance is computed.
+Second, validation set performance is compared.
+Third, the test set performance is computed and confusion matrix is displayed. 
+Finally, the top ten most important features are identified and stored in a data frame.
+
+
+## Some data preprocessing necessary for xgboost
+```{r}
+data_XGB <- one_hot_encode(data)
+ncol(data_XGB)
+
+train_set_XGB <- data_XGB[train_indices, ]
+validation_set_XGB <- data_XGB[validation_indices, ]
+test_set_XGB <- data_XGB[test_indices, ]
+
+train_matrix_XGB <- as.matrix(train_set_XGB[,2:ncol(data_XGB)])
+val_matrix_XGB <- as.matrix(validation_set_XGB[,2:ncol(data_XGB)])
+test_matrix_XGB <- as.matrix(test_set_XGB[,2:ncol(data_XGB)])
+
+dtrain <- xgb.DMatrix(data = train_matrix_XGB, label = actual_class_train)
+dval <- xgb.DMatrix(data = val_matrix_XGB, label = actual_class_validation)
+dtest <- xgb.DMatrix(data = test_matrix_XGB, label = actual_class_test)
+```
+
+
+## Model 1
+
+```{r}
+start.time = Sys.time()
+
+params <- list(
+  objective = "binary:logistic",
+  eval_metric = "auc",
+  eta = 0.1,
+  max_depth = 6,
+  subsample = 0.8,
+  colsample_bytree = 0.8
+)
+
+set.seed(123)
+xgbmod1 <- xgb.train(
+  params = params,
+  data = dtrain,
+  watchlist = list(train = dtrain, val = dval),
+  nrounds = 100,
+  early_stopping_rounds = 10,
+  verbose = 1
+)
+
+end.time = Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+xgb_prob_pred1 <- predict(xgbmod1, dval)
+val_metrics_xgb1 <- perf_met_fu(xgb_prob_pred1, actual_class_validation)
+```
+
+
+
+## Model 2
+
+```{r}
+num_positive <- sum(actual_class_train == 1)
+num_negative <- sum(actual_class_train == 0)
+scale_pos_weight <- num_negative / num_positive
+
+start.time = Sys.time()
+
+params2 <- list(
+  objective = "binary:logistic",
+  eval_metric = "auc",
+  eta = 0.1,
+  max_depth = 6,
+  subsample = 0.8,
+  colsample_bytree = 0.8,
+  scale_pos_weight = scale_pos_weight
+)
+
+set.seed(123)
+xgbmod2 <- xgb.train(
+  params = params2,
+  data = dtrain,
+  nrounds = 100,
+  watchlist = list(train = dtrain, val = dval),
+  early_stopping_rounds = 10,
+  print_every_n = 10
+)
+
+end.time = Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+xgb_prob_pred2 <- predict(xgbmod2, dval)
+val_metrics_xgb2 <- perf_met_fu(xgb_prob_pred2, actual_class_validation)
+```
+
+
+
+## Model 3
+
+```{r}
+scale_pos_weight2 <- 2 * num_negative / num_positive
+
+start.time = Sys.time()
+
+params3 <- list(
+  objective = "binary:logistic",
+  eval_metric = "auc",
+  eta = 0.1,
+  max_depth = 6,
+  subsample = 0.8,
+  colsample_bytree = 0.8,
+  scale_pos_weight = scale_pos_weight2
+)
+
+set.seed(123)
+xgbmod3 <- xgb.train(
+  params = params3,
+  data = dtrain,
+  nrounds = 100,
+  watchlist = list(train = dtrain, val = dval),
+  early_stopping_rounds = 10,
+  print_every_n = 10
+)
+
+end.time = Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+xgb_prob_pred3 <- predict(xgbmod3, dval)
+val_metrics_xgb3 <- perf_met_fu(xgb_prob_pred3, actual_class_validation)
+```
+
+
+
+## Model 4
+
+```{r}
+start.time = Sys.time()
+
+params4 <- list(
+  objective = "binary:logistic",
+  eval_metric = "auc",
+  eta = 0.1,
+  max_depth = 15,
+  subsample = 0.8,
+  colsample_bytree = 0.8,
+  scale_pos_weight = scale_pos_weight  # Handle class imbalance
+)
+
+set.seed(123)
+xgbmod4 <- xgb.train(
+  params = params4,
+  data = dtrain,
+  nrounds = 100,
+  watchlist = list(train = dtrain, val = dval),
+  early_stopping_rounds = 10,
+  print_every_n = 10
+)
+
+end.time = Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+xgb_prob_pred4 <- predict(xgbmod4, dval)
+val_metrics_xgb4 <- perf_met_fu(xgb_prob_pred4, actual_class_validation)
+```
+
+
+
+## Comparison on validation set
+```{r}
+models <- c("XGB1", "XGB2", "XGB3", "XGB4")
+
+results_tableXGB <- data.frame(
+  Model = models,
+  AUC = c(val_metrics_xgb1[1], val_metrics_xgb2[1], val_metrics_xgb3[1], val_metrics_xgb4[1]),
+  PR_AUC = c(val_metrics_xgb1[2], val_metrics_xgb2[2], val_metrics_xgb3[2], val_metrics_xgb4[2]),
+  Brier_Score = c(val_metrics_xgb1[3], val_metrics_xgb2[3], val_metrics_xgb3[3], val_metrics_xgb4[3])
+)
+
+print(results_tableXGB)
+```
+
+
+## Predictions on test set
+```{r}
+test_prob_pred_XGB <- predict(xgbmod1, dtest)
+test_metrics_xgb <- perf_met_fu(test_prob_pred_XGB, actual_class_test)
+print(paste0("ROC-AUC: ", test_metrics_xgb[1], ", PR-AUC: ", test_metrics_xgb[2], ", Brier score: ", test_metrics_xgb[3]))
+
+optimal_threshold_XGB <- opt_thres_fu(test_prob_pred_XGB, actual_class_test)
+test_xgb_class_pred <- ifelse(test_prob_pred_XGB > as.numeric(optimal_threshold_XGB)[1], 1, 0)
+
+confusion_matrix_XGB <- cm_fu(test_xgb_class_pred, actual_class_test)
+print(confusion_matrix_XGB)
+```
+
+
+
+## Interpretability/Variable importance
+
+```{r}
+importance_matrix_XGB <- head(as.matrix(xgb.importance(model = xgbmod1)), 10)
+print(importance_matrix_XGB)
+```
