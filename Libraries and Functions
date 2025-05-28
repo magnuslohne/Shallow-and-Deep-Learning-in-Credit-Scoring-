@@ -1,0 +1,70 @@
+# Load packages
+```{r}
+library(e1071)
+library(pROC)
+library(PRROC)
+library(DescTools)
+library(iml)
+library(randomForest)
+library(xgboost)
+library(xtable)
+library(reticulate)
+library(readxl)
+library(dplyr)
+library(corrplot)
+```
+
+# Functions
+```{r}
+# Binary confusion matrix, given class predictions and true labels
+cm_fu <- function(pred, actual) {
+  return(
+    table(
+    Predicted = factor(pred, levels = c(1, 0)),
+    Actual = factor(actual, levels = c(1, 0)))
+    )
+}
+
+# Performance metrics function (ROC-AUC, PR-AUC, Brier score), given probability predictions and true labels
+perf_met_fu <- function(pred, actual){
+  # ROC
+  roc_obj <- roc(actual, pred, levels = c(0, 1), direction = "<")
+  auc_value <- roc_obj$auc
+  optimal_threshold <- coords(roc_obj, "best")
+  
+  #PR
+  pr_curve <- pr.curve(scores.class0 = pred, 
+                       weights.class0 = actual, 
+                       curve = TRUE)
+  pr_auc <- pr_curve$auc.integral
+  
+  #Brier
+  brier_score <- BrierScore(actual, pred)
+  
+  return(c(auc_value, pr_auc, brier_score))
+}
+
+#Optimal threshold based on ROC-AUC
+opt_thres_fu <- function(pred, actual){
+  roc_obj <- roc(actual, pred, levels = c(0, 1), direction = "<")
+  optimal_threshold <- coords(roc_obj, "best")
+  
+  return(optimal_threshold)
+}
+
+#One hot encoding of factors in dataframe
+one_hot_encode <- function(df) {
+  for (col_name in names(df)) {
+    if (is.factor(df[[col_name]])) {
+      ohe <- model.matrix(~ . - 1, data = df[col_name])
+      
+      colnames(ohe) <- paste(col_name, gsub(paste0("^", col_name), "", colnames(ohe)), sep = "_")
+      
+      df <- cbind(df, ohe)
+      
+      df[[col_name]] <- NULL
+    }
+  }
+  return(df)
+}
+```
