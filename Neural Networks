@@ -1,0 +1,206 @@
+# Neural Networks (MLPs)
+
+This code is organised as follows: 
+First, each model is trained (training time is calculated and displayed) and validation performance is computed.
+Second, validation set performance is compared.
+Third, the test set performance is computed and confusion matrix is displayed. 
+Finally, the top ten most important features are identified and stored in a data frame.
+
+Note: Restarting R session / copying the script and running in python or another
+.Rmd script might be necessary to run this section. The rest of this script 
+runs in an Anaconda environment (r-tensorflow) using the reticulate package to 
+interface between R and Python. Ensure that the correct Conda environment is 
+activated before execution, and restart the R session if switching environments.
+If TensorFlow or Keras is not recognized, verify the installation within the 
+r-tensorflow environment.
+
+
+## Activate anaconda environment and load libraries/packages
+```{r}
+reticulate::use_condaenv("r-tensorflow", required = TRUE)
+
+library(tensorflow)
+library(keras)
+library(dplyr)
+
+tf$constant("Hello, TensorFlow!")
+```
+
+
+## Necessary preprocessing
+```{r}
+data_NN <- one_hot_encode(data)
+ncol(data_NN)
+
+train_set_NN <- data_NN[train_indices, ]
+validation_set_NN <- data_NN[validation_indices, ]
+test_set_NN <- data_NN[test_indices, ]
+
+X_train <- as.matrix(train_set_NN[,2:ncol(data_NN)])
+X_val <- as.matrix(validation_set_NN[,2:ncol(data_NN)])
+X_test <- as.matrix(test_set_NN[,2:ncol(data_NN)])
+
+y_train <- as.numeric(unlist(train_set[,1]))
+y_val   <- as.numeric(unlist(validation_set[,1]))
+y_test  <- as.numeric(unlist(test_set[,1]))
+```
+
+
+
+## Model 1
+
+```{r}
+set.seed(123) 
+tensorflow::set_random_seed(123)
+
+NNmodel1 <- keras_model_sequential() %>%
+  layer_dense(units = 64, activation = "relu", input_shape = ncol(X_train)) %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+NNmodel1 %>% compile(
+  optimizer = optimizer_adam(learning_rate = 0.001),
+  loss = "binary_crossentropy",
+  metrics = list(metric_auc())
+)
+
+class_weights <- list("0" = 1, "1" = 50) # weights to handle class imbalance
+
+start.time <- Sys.time()
+
+history1 <- NNmodel1 %>% fit(
+  x = X_train,
+  y = y_train,
+  epochs = 50,
+  batch_size = 256,
+  validation_data = list(X_val, y_val),
+  class_weight = class_weights
+  )
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+NN_prob_pred1 <- NNmodel1 %>% predict(X_val)
+NN_prob_pred1 <- as.vector(NN_prob_pred1)
+
+val_metrics_NN1 <- perf_met_fu(NN_prob_pred1, actual_class_validation)
+```
+
+
+
+## MODEL 2
+
+```{r}
+set.seed(123)  
+tensorflow::set_random_seed(123)
+
+NNmodel2 <- keras_model_sequential() %>%
+  layer_dense(units = 128, activation = "relu", input_shape = ncol(X_train)) %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 64, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 32, activation = "relu") %>%
+  layer_dense(units = 1, activation = "sigmoid")
+
+NNmodel2 %>% compile(
+  optimizer = optimizer_adam(learning_rate = 0.002),
+  loss = "binary_crossentropy",
+  metrics = list(metric_auc())
+)
+
+class_weights <- list("0" = 2, "1" = 50)
+
+start.time <- Sys.time()
+
+set.seed(123)
+history2 <- NNmodel2 %>% fit(
+  x = X_train,
+  y = y_train,
+  epochs = 50,
+  batch_size = 256,
+  validation_data = list(X_val, y_val),
+  class_weight = class_weights
+  )
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+NN_prob_pred2 <- NNmodel2 %>% predict(X_val)
+NN_prob_pred2 <- as.vector(NN_prob_pred2)
+val_metrics_NN2 <- perf_met_fu(NN_prob_pred2, actual_class_validation)
+```
+
+
+
+## Comparison on validation set
+
+```{r}
+models <- c("NN1", "NN2")
+
+results_tableNN <- data.frame(
+  Model = models,
+  AUC = c(val_metrics_NN1[1], val_metrics_NN2[1]),
+  PR_AUC = c(val_metrics_NN1[2], val_metrics_NN2[2]),
+  Brier_Score = c(val_metrics_NN1[3], val_metrics_NN2[3])
+)
+
+print(results_tableNN)
+```
+
+
+
+## Performance on test set
+
+```{r}
+test_prob_pred_NN <- NNmodel1 %>% predict(X_test)
+test_prob_pred_NN <- as.vector(test_prob_pred_NN)
+
+test_metrics_NN <- perf_met_fu(test_prob_pred_NN, actual_class_test)
+print(paste0("ROC-AUC: ", test_metrics_NN[1], ", PR-AUC: ", test_metrics_NN[2], ", Brier score: ", test_metrics_NN[3]))
+
+optimal_threshold_NN <- opt_thres_fu(test_prob_pred_NN, actual_class_test)
+test_NN_class_pred <- ifelse(test_prob_pred_NN > as.numeric(optimal_threshold_NN)[1], 1, 0)
+confusion_matrix_NN <- cm_fu(test_NN_class_pred, actual_class_test)
+print(confusion_matrix_NN)
+```
+
+
+
+
+## Interpretability/Variable importance
+
+```{r}
+X_test_py <- r_to_py(X_test)
+X_train_py <- r_to_py(X_train)
+set.seed(123)
+def <- sample(which(y_train==1), size=100)
+nondef <- sample(which(y_train==0), size=900)
+background_data <- X_train_py[c(def,nondef), ]
+
+shap <- import("shap")
+explainor_NN <- shap$DeepExplainer(NNmodel1, background_data)
+shap_values_NN <- explainor_NN$shap_values(X_test_py) 
+
+shap_matrix <- as.matrix(shap_values_NN[[1]])
+
+shap_matrix_abs <- abs(shap_matrix)
+mean_shap <- colMeans(shap_matrix_abs)
+
+feature_names <- colnames(X_test)
+
+shap_table <- data.frame(
+  Feature = feature_names,
+  SHAP = mean_shap
+)
+
+shap_table_sorted <- shap_table %>%
+  arrange(desc(SHAP))
+
+top_10_shap <- head(shap_table_sorted, 10)
+print(top_10_shap)
+```
