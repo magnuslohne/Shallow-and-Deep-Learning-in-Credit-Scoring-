@@ -1,0 +1,166 @@
+# LOGISTIC REGRESSION
+This code is organised as follows: 
+First, each model is trained (training time is calculated and displayed) and validation performance is computed.
+Second, validation set performance is compared.
+Third, the test set performance is computed and confusion matrix is displayed. 
+Finally, the top ten most important features are identified and stored in a data frame.
+
+## Model 1
+```{r}
+start.time <- Sys.time()
+
+lrmod1 <- glm(train_set$Default_next_12_months ~ ., data = train_set, family = "binomial")
+end.time <- Sys.time()
+
+time.taken <- end.time - start.time
+time.taken
+
+summary(lrmod1)
+
+lr_prob_pred1 <- predict(lrmod1, newdata = validation_set, type = "response")
+val_metrics_lrmod1 <- perf_met_fu(lr_prob_pred1, actual_class_validation)
+```
+
+
+
+## Model 2
+```{r}
+start.time <- Sys.time()
+
+lrmod2 <- glm(Default_next_12_months ~ Income + Age + Payment_remarks + 
+                Credit_History_Last_12_Months+ Savings_Agreement_Bank + 
+                Mortgage_on_Property + Deposit_TR200000_R5 + Loan_TR1000000_R5 +
+                Wealth_TR2000000_R5, family = "binomial", data = train_set)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+summary(lrmod2)
+
+lr_prob_pred2 <- predict(lrmod2, newdata = validation_set, type = "response")
+val_metrics_lrmod2 <- perf_met_fu(lr_prob_pred2, actual_class_validation)
+```
+
+
+## Model 3
+```{r}
+start.time <- Sys.time()
+
+lrmod3 <- glm(Default_next_12_months ~ Income + Age + Payment_remarks + 
+                Credit_History_Last_12_Months + Savings_Agreement_Bank + 
+                Deposit_TR200000_R5 + Loan_TR1000000_R5 + Wealth_TR2000000_R5, 
+              family = "binomial", data = train_set)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+summary(lrmod3)
+
+lr_prob_pred3 <- predict(lrmod3, newdata = validation_set, type = "response")
+val_metrics_lrmod3 <- perf_met_fu(lr_prob_pred3, actual_class_validation)
+```
+
+
+## Model 4 
+```{r}
+start.time <- Sys.time()
+
+lrmod4 <- glm(Default_next_12_months ~ Sole_proprietorship + Savings_Agreement_Fund
+              + Savings_Agreement_Bank + Sector + Mortgage_on_Property + 
+                Mortgage_Savings + Households, 
+              family = "binomial", data = train_set)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+summary(lrmod4)
+
+lr_prob_pred4 <- predict(lrmod4, newdata = validation_set, type = "response")
+val_metrics_lrmod4 <- perf_met_fu(lr_prob_pred4, actual_class_validation)
+```
+
+
+
+## Model 5 
+```{r}
+start.time <- Sys.time()
+
+lrmod5 <- glm(Default_next_12_months ~ Loan + Income + Age + Payment_remarks + 
+                Wealth + Deposit + Overdue_ammount +
+                Credit_History_Last_12_Months + Overdue_Amount_TR30000_R2 +
+                Deposit_TR200000_R5 + Loan_TR1000000_R5 + Wealth_TR2000000_R5, 
+              family = "binomial", data = train_set)
+
+end.time <- Sys.time()
+time.taken <- end.time - start.time
+time.taken
+
+summary(lrmod5)
+
+lr_prob_pred5 <- predict(lrmod5, newdata = validation_set, type = "response")
+val_metrics_lrmod5 <- perf_met_fu(lr_prob_pred5, actual_class_validation)
+```
+
+
+## Validation set comparison
+```{r}
+models <- c("LR1", "LR2", "LR3", "LR4", "LR5")
+
+results_tableLR <- data.frame(
+  Model = models,
+  AUC = c(val_metrics_lrmod1[1], val_metrics_lrmod2[1], val_metrics_lrmod3[1], val_metrics_lrmod4[1], val_metrics_lrmod5[1]),
+  PR_AUC = c(val_metrics_lrmod1[2], val_metrics_lrmod2[2], val_metrics_lrmod3[2], val_metrics_lrmod4[2], val_metrics_lrmod5[2]),
+  Brier_Score = c(val_metrics_lrmod1[3], val_metrics_lrmod2[3], val_metrics_lrmod3[3], val_metrics_lrmod4[3], val_metrics_lrmod5[3])
+)
+
+print(results_tableLR)
+```
+
+
+## Performance on test set
+```{r}
+test_prob_pred_LR <- predict(lrmod1, newdata = test_set, type = "response")
+test_metrics_lr <- perf_met_fu(pred = test_prob_pred_LR, actual = actual_class_test)
+
+optimal_threshold_LR <- opt_thres_fu(test_prob_pred_LR, actual_class_test)
+predicted_class_LR <- ifelse(test_prob_pred_LR > as.numeric(optimal_threshold_LR)[1], 1, 0)
+
+confusion_matrix_LR <- cm_fu(predicted_class_LR, actual_class_test)
+print(confusion_matrix_LR)
+```
+
+
+## Interpretability/Variable importance
+
+### Table of 10 most important predictors in the final model
+```{r}
+summary_lrmod1 <- summary(lrmod1)
+coefficients_LR <- summary_lrmod1$coefficients # coefficients
+p_values <- coefficients_LR[, 4]  # p-values
+
+# remove the intercept
+coefficients_LR_no_intercept <- coefficients_LR[-1] 
+p_values_no_intercept <- p_values[-1]
+
+# extract the significant coefficients
+significant_indices <- which(p_values_no_intercept < 0.05)
+significant_coefficients_LR <- coefficients_LR_no_intercept[significant_indices]
+significant_p_values <- p_values_no_intercept[significant_indices]
+
+# sort the coefficients by magnitude
+sorted_indices <- order(abs(significant_coefficients_LR), decreasing = TRUE)
+sorted_coefficients_LR <- significant_coefficients_LR[sorted_indices]
+sorted_p_values <- significant_p_values[sorted_indices]
+
+# print table of coefficients and p-values
+top_10_coefficients_LR <- head(sorted_coefficients_LR, 10)
+top_10_p_values <- head(sorted_p_values, 10)
+
+top_10_table_LR <- data.frame(
+  Coefficient = top_10_coefficients_LR,
+  P_Value = top_10_p_values
+)
+```
