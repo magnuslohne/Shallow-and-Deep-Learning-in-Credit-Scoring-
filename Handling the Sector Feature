@@ -1,0 +1,62 @@
+# First approach in handling the sector factor
+
+```{r}
+dat_2012 <- read.csv("92.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)
+dat_1987 <- read.csv("93.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)
+
+ssb_sector_codes_2012 <- as.numeric(dat_2012$code[1:24])
+ssb_sector_codes_1987 <- as.numeric(dat_1987$code[1:35])
+ssb_sector_codes <- c(ssb_sector_codes_1987, ssb_sector_codes_2012)
+fixed_codes <- c(8200, 8500, 9800)
+normalised_categories_dataset <- sort(unique(data$Sector)) 
+c <- as.numeric(summary(as.factor(data$Sector))) 
+N <- sum(c)
+library(purrr)
+remaining <- setdiff(ssb_sector_codes, fixed_codes) 
+evaluate_combo <- function(extra_codes) {
+  k <- sort(c(extra_codes, fixed_codes))
+  m <- sum(k * c) / N
+  s <- sqrt(sum(c * (k - m)^2) / (N - 1))
+  norm_k_try <- (k - m) / s
+  return(c(norm_k_try, k, mean(norm_k_try), sd(norm_k_try)))
+}
+combinations <- combn(remaining, 6-length(fixed_codes), simplify = FALSE)
+best_combo_dev <- rep(40, 6)
+best_dev <- sum(abs(best_combo_dev - normalised_categories_dataset))
+for (i in 1:length(combinations)) {
+  comb_eval_i <- evaluate_combo(combinations[[i]])
+  norm_comb <- comb_eval_i[1:6]
+  comb_dev <- sum(abs(norm_comb - normalised_categories_dataset))
+  if (comb_dev < best_dev) {
+    best_dev = comb_dev
+    best_mean = comb_eval_i[13]
+    best_sd = comb_eval_i[14]
+    norm_best_combo_dev = comb_eval_i[1:6]
+    best_combo_dev = comb_eval_i[7:12]
+  }
+}
+best_mean
+best_sd
+best_combo_dev
+norm_best_combo_dev
+normalised_categories_dataset
+```
+
+
+# Second approach
+
+```{r}
+norm_diffs_true <- diff(sort(unique(data$Sector))) 
+d <- norm_diffs_true[4] / (8500-8200)
+diffs_true <- norm_diffs_true / d 
+k_try <- c(8200-diffs_true[3]-diffs_true[2]-diffs_true[1], 8200-diffs_true[3]-diffs_true[2], 
+8200-diffs_true[3], 8200, 8500, 9800)
+m <- (1/N)*sum(k_try * c)
+ssq <- sum(c * (k_try - m)^2) / (N - 1)
+s <- sqrt(ssq)
+norm_k_try <- (k_try - m) / s
+norm_k_try
+sort(unique(data$Sector))
+abs(norm_k_try - sort(unique(data$Sector)))
+```
+
