@@ -1,0 +1,90 @@
+# Removing redundant features
+```{r}
+data <- data[,-c(18,22)]
+head(data)
+ncol(data)
+```
+
+# Names
+```{r}
+colnames(data) <- c("Default_next_12_months", "Loan", "Age", "Income", "Wealth", "Deposit", "Overdue_ammount", "Payment_remarks", "Sole_proprietorship", "Credit_History_Last_12_Months", "Savings_Agreement_Bank", "Savings_Agreement_Fund", "Sector", "Mortgage_on_Property", "Deposit_TR200000_R5", "Overdue_Amount_TR30000_R2", "Loan_TR1000000_R5", "Wealth_TR2000000_R5", "Mortgage_Savings", "Households")
+
+head(data)
+summary(data)
+```
+
+# NA data
+```{r}
+ageMean <- mean(data$Age, na.rm = TRUE)
+data$Age[is.na(data$Age)] <- ageMean
+```
+
+
+# Preprocessing of Sector
+```{r}
+# Change old SSB table values to new ones
+data$Sector[which(data$Sector < 0 & data$Sector > -1.27)] = 0.68617650845058
+data$Sector[which(data$Sector < -1.27 & data$Sector > -1.302)] = 0.766852814488622
+data$Sector[which(data$Sector < -1.302)] = 1.11645014065347
+
+# Set the levels
+data$Sector <- as.factor(data$Sector)
+levels(data$Sector) <- c(8200, 8500, 9000)
+
+# Convert Households based on Sector
+data$Households <- ifelse(data$Sector=="8200", 0, 1)
+#Normalise Households and make factor
+data$Households <- (data$Households - mean(data$Households)) / sd(data$Households)
+
+# Normalise Sector
+data$Sector <- as.numeric(data$Sector)
+data$Sector <- (data$Sector - mean(data$Sector)) / sd(data$Sector)
+```
+
+
+# Correlation plot of features
+```{r}
+correlation_features <- cor(data[,2:ncol(data)])
+corrplot(correlation_features, method = 'color')
+```
+
+# Factorise relevant features
+```{r}
+data$Sector <- as.factor(data$Sector)
+data$Households <- as.factor(data$Households)
+data$Sole_proprietorship <- as.factor(data$Sole_proprietorship)
+data$Savings_Agreement_Bank <- as.factor(data$Savings_Agreement_Bank)
+data$Savings_Agreement_Fund <- as.factor(data$Savings_Agreement_Fund)
+data$Mortgage_on_Property <- as.factor(data$Mortgage_on_Property)
+data$Mortgage_Savings <- as.factor(data$Mortgage_Savings)
+```
+
+
+# Split the dataset
+```{r}
+n <- nrow(data)
+
+set.seed(123)
+shuffled_indices <- sample(1:n)
+
+train_size <- round(0.6 * n) # 60% training
+validation_size <- round(0.2 * n) # 20% validation
+test_size <- n - train_size - validation_size # 20% test
+
+train_indices <- shuffled_indices[1:train_size]
+validation_indices <- shuffled_indices[(train_size + 1):(train_size + validation_size)]
+test_indices <- shuffled_indices[(train_size + validation_size + 1):n]
+  
+train_set <- data[train_indices, ]
+validation_set <- data[validation_indices, ]
+test_set <- data[test_indices, ]
+
+cat("Training set size:", nrow(train_set), "\n")
+cat("Validation set size:", nrow(validation_set), "\n")
+cat("Test set size:", nrow(test_set), "\n")
+
+# Store validation and test targets
+actual_class_train <- train_set$Default_next_12_months
+actual_class_validation <- validation_set$Default_next_12_months
+actual_class_test <- test_set$Default_next_12_months
+```
