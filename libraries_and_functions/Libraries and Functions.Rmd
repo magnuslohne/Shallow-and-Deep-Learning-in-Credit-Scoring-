@@ -3,7 +3,7 @@ title: "Libraries and Functions"
 ---
 
 
-# Load packages
+# Required libraries
 ```{r}
 library(e1071)
 library(pROC)
@@ -17,9 +17,11 @@ library(reticulate)
 library(readxl)
 library(dplyr)
 library(corrplot)
+library(ggplot2)
+library(naniar)
 ```
 
-# Functions
+# Custom functions
 ```{r}
 # Binary confusion matrix, given class predictions and true labels
 cm_fu <- function(pred, actual) {
