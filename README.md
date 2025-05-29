@@ -1,4 +1,4 @@
-# Shallow-and-Deep-Learning-in-Credit-Scoring-
+# Shallow and Deep Learning in Credit Scoring - Master's Thesis
 
 ## Project Structure
 
