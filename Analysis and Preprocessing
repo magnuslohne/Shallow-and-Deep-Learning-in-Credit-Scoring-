@@ -1,3 +1,5 @@
+
+
 # Removing redundant features
 ```{r}
 data <- data[,-c(18,22)]
@@ -40,7 +42,11 @@ data$Households <- (data$Households - mean(data$Households)) / sd(data$Household
 data$Sector <- as.numeric(data$Sector)
 data$Sector <- (data$Sector - mean(data$Sector)) / sd(data$Sector)
 ```
-
+# Import data
+```{r}
+data <- read_excel("export_etter_norm.xlsx", col_names = FALSE)
+head(data)
+```
 
 # Correlation plot of features
 ```{r}
@@ -59,6 +65,10 @@ data$Mortgage_on_Property <- as.factor(data$Mortgage_on_Property)
 data$Mortgage_Savings <- as.factor(data$Mortgage_Savings)
 ```
 
+# Summary
+```{r}
+str(data)
+```
 
 # Split the dataset
 ```{r}
