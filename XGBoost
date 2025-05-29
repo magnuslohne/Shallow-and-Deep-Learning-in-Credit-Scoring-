@@ -1,4 +1,6 @@
-# XGBoost
+---
+title: "XGBoost"
+---
 
 This code is organised as follows: 
 First, each model is trained (training time is calculated and displayed) and validation performance is computed.
