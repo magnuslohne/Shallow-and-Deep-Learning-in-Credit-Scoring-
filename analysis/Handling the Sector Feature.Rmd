@@ -7,43 +7,43 @@ title: "Analysis and Preprocessing"
 Tried to find the combination of codes that yielded the mean and standard deviation closest to the ones of the normalised variable in the dataset.
 
 ```{r}
-dat_2012 <- read.csv("92.csv", sep=";", header=TRUE, stringsAsFactors = FALSE) #Statistics Norway table from 2012
-dat_1987 <- read.csv("93.csv", sep=";", header=TRUE, stringsAsFactors = FALSE) #Statistics Norway table from 1987
+data_handlesec <- data    #replicate original dataset
+dat_2012 <- read.csv("92.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)    #Statistics Norway table from 2012
+dat_1987 <- read.csv("93.csv", sep=";", header=TRUE, stringsAsFactors = FALSE)    #Statistics Norway table from 1987
 
 ssb_sector_codes_2012 <- as.numeric(dat_2012$code[1:24])
 ssb_sector_codes_1987 <- as.numeric(dat_1987$code[1:35])
 ssb_sector_codes <- c(ssb_sector_codes_1987, ssb_sector_codes_2012)
-fixed_codes <- c(8200, 8500, 9800)
+fixed_codes <- c(8200, 8500, 9800)    #already known codes
 
-normalised_categories_dataset <- sort(unique(data$Sector)) 
-c <- as.numeric(summary(as.factor(data$Sector))) 
-N <- sum(c)
+normalised_categories_dataset <- sort(unique(data_handlesec$Sector))    #factor levels for Sector 
+c <- as.numeric(summary(as.factor(data_handlesec$Sector)))    #no. of observations in each level
+N <- sum(c)    #total number of observations
 
-library(purrr)
-remaining <- setdiff(ssb_sector_codes, fixed_codes) 
+remaining <- setdiff(ssb_sector_codes, fixed_codes)    #returns the elements in ssb_sector_codes that are not in fixed_codes
 
 evaluate_combo <- function(extra_codes) {
-  k <- sort(c(extra_codes, fixed_codes))
-  m <- sum(k * c) / N
-  s <- sqrt(sum(c * (k - m)^2) / (N - 1))
-  norm_k_try <- (k - m) / s
+  k <- sort(c(extra_codes, fixed_codes))    #combinations of codes
+  m <- sum(k * c) / N    #mean of combination
+  s <- sqrt(sum(c * (k - m)^2) / (N - 1))    #sd of combination
+  norm_k_try <- (k - m) / s    #combination normalised
   return(c(norm_k_try, k, mean(norm_k_try), sd(norm_k_try)))
 }
 
-combinations <- combn(remaining, 6-length(fixed_codes), simplify = FALSE)
-best_combo_dev <- rep(40, 6)
-best_dev <- sum(abs(best_combo_dev - normalised_categories_dataset))
+combinations <- combn(remaining, 6-length(fixed_codes), simplify = FALSE) #all combinations of remaining codes
+best_combo_dev <- rep(40, 6)    #initialise best combination in terms of deviation from values in the dataset
+best_dev <- sum(abs(best_combo_dev - normalised_categories_dataset))    #initialise deviation of best combination
 
-for (i in 1:length(combinations)) {
-  comb_eval_i <- evaluate_combo(combinations[[i]])
-  norm_comb <- comb_eval_i[1:6]
-  comb_dev <- sum(abs(norm_comb - normalised_categories_dataset))
+for (i in 1:length(combinations)) {    #loop through all combinations
+  comb_eval_i <- evaluate_combo(combinations[[i]])    #evaluate
+  norm_comb <- comb_eval_i[1:6]    #normalised combination
+  comb_dev <- sum(abs(norm_comb - normalised_categories_dataset))    #deviation
   if (comb_dev < best_dev) {
     best_dev = comb_dev
-    best_mean = comb_eval_i[13]
-    best_sd = comb_eval_i[14]
-    norm_best_combo_dev = comb_eval_i[1:6]
-    best_combo_dev = comb_eval_i[7:12]
+    best_mean = comb_eval_i[13]    #extract mean
+    best_sd = comb_eval_i[14]    #extract sd
+    norm_best_combo_dev = comb_eval_i[1:6]    #extract best normalised combination
+    best_combo_dev = comb_eval_i[7:12]    #extract best combination
   }
 }
 
@@ -58,22 +58,21 @@ print(normalised_categories_dataset)
 
 # Second approach
 Tried to find the combination that matched the differences of the true categories already known.
+This code ended up solving the problem.
 
 ```{r}
-norm_diffs_true <- diff(sort(unique(data$Sector)))
-d <- norm_diffs_true[4] / (8500-8200)
-diffs_true <- norm_diffs_true / d 
+norm_diffs_true <- diff(sort(unique(data_handlesec$Sector)))    #differences between normalised sector levels
+d <- norm_diffs_true[4] / (8500-8200)    #find normalised differences by dividing by two known codes 
+diffs_true <- norm_diffs_true / d   #divide all levels by the true difference
 
 k_try <- c(8200-diffs_true[3]-diffs_true[2]-diffs_true[1], 8200-diffs_true[3]-diffs_true[2], 
-8200-diffs_true[3], 8200, 8500, 9800)
+8200-diffs_true[3], 8200, 8500, 9800)    #try a combination
 
-m <- (1/N)*sum(k_try * c)
-ssq <- sum(c * (k_try - m)^2) / (N - 1)
-s <- sqrt(ssq)
-norm_k_try <- (k_try - m) / s
+m <- (1/N)*sum(k_try * c)    #compute mean of combination
+ssq <- sum(c * (k_try - m)^2) / (N - 1)    #compute variance of combination
+s <- sqrt(ssq)    #compute sd of combination
+norm_k_try <- (k_try - m) / s    #normalise combination
 
-print(norm_k_try)
-print(sort(unique(data$Sector)))
-print(abs(norm_k_try - sort(unique(data$Sector))))
+print(abs(norm_k_try - sort(unique(data_handlesec$Sector))))    #compare combination with true levels
 ```
 
