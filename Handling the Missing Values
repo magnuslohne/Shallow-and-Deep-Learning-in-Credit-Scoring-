@@ -1,0 +1,24 @@
+library(naniar)
+mcar_test(data)
+
+data_naAnalysis <- data
+data_naAnalysis$Age <- as.numeric(is.na(data_naAnalysis$Age))
+ageNA <- which(data_naAnalysis$Age==1)
+
+
+na_mod <- glm(Age ~ ., data=data_naAnalysis, family="binomial")
+summary(na_mod)
+
+
+summary(data_naAnalysis$Loan[ageNA])
+summary(data_naAnalysis$Loan[-ageNA])
+
+summary(data_naAnalysis$Loan_TR1000000_R5[ageNA])
+summary(data_naAnalysis$Loan_TR1000000_R5[-ageNA])
+
+summary(data_naAnalysis$Deposit_TR200000_R5[ageNA])
+summary(data_naAnalysis$Deposit_TR200000_R5[-ageNA])
+
+summary(data_naAnalysis$Credit_History_Last_12_Months[ageNA])
+summary(data_naAnalysis$Credit_History_Last_12_Months[-ageNA])
+
