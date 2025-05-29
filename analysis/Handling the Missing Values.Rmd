@@ -2,16 +2,16 @@
 title: "Handling the Missing Values"
 ---
 
-mcar_test(data)
+mcar_test(data)    #is NA data mcar?
 
-data_naAnalysis <- data
-data_naAnalysis$Age <- as.numeric(is.na(data_naAnalysis$Age))
-ageNA <- which(data_naAnalysis$Age==1)
+data_naAnalysis <- data   #replicate original dataset
+data_naAnalysis$Age <- as.numeric(is.na(data_naAnalysis$Age))    #Age for logistic regression
 
+na_mod <- glm(Age ~ ., data=data_naAnalysis, family="binomial")    #logistic regression model
+summary(na_mod)    #ifdentify significant features
 
-na_mod <- glm(Age ~ ., data=data_naAnalysis, family="binomial")
-summary(na_mod)
-
+# Compare the significant features between the observations with Age NA and Age not NA
+ageNA <- which(data_naAnalysis$Age==1) 
 
 summary(data_naAnalysis$Loan[ageNA])
 summary(data_naAnalysis$Loan[-ageNA])
