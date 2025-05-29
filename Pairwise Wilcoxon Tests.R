@@ -39,7 +39,7 @@ neg_list <- list(
   neg_2 = neg_df2
 )
 
-feats <- c("Feature_1", "Feature_2", "Feature_3)
+numeric_feats <- c("Feature_1", "Feature_2", "Feature_3)
 
 p_values_list <- wilcox_compare_numfeatures(pos_df, neg_list, feats)
 
