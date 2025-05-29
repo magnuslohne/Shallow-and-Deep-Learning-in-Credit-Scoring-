@@ -1,5 +1,4 @@
 # Function
-
 create_facet_histogram <- function(data, x_var, filename, bin_count = 11) {
   x_vals <- data[[x_var]]
 
@@ -22,13 +21,22 @@ create_facet_histogram <- function(data, x_var, filename, bin_count = 11) {
 }
 
 # Example usage
-df_age <- data.frame(
-  Age = c(age_pos, age_neg, rand_age_neg),
+pos_df <- data.frame(test_set[which(test_set$Response == 1), ])
+npos <- nrow(pos_df)
+
+neg_df1 <- data.frame(test_set[which(test_set$Response == 0), ])
+nneg <- nrow(neg_def1)
+
+neg_df2 <- data.frame(test_set[sample(which(test_set$Response == 0), npos), ])
+
+
+df_Feature1 <- data.frame(
+  Feature = c(pos_df$Feature_1, neg_df1$Feature_1, neg_df2$Feature_1),
   Group = factor(c(
-    rep("All Defaults", length(age_pos)),
-    rep("All No-Defaults", length(age_neg)),
-    rep("Subset of No-Defaults", length(rand_age_neg))
-  ), levels = c("All Defaults", "All No-Defaults", "Subset of No-Defaults"))
+    rep("All Positives", npos),
+    rep("All Negatives", nneg),
+    rep("Subset of Negatives", npos)
+  ), levels = c("All Positives", "All Negatives", "Subset of Negatives"))
 )
 
-create_facet_histogram(df_age, "Age", "age_testset_plot.pdf")
+create_facet_histogram(df_Feature1, "Feature 1", "Feature1_testset_plot.pdf")
