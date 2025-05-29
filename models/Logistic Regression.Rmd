@@ -6,7 +6,7 @@ This code is organised as follows:
 First, each model is trained (training time is calculated and displayed) and validation performance is computed.
 Second, validation set performance is compared.
 Third, the test set performance is computed and confusion matrix is displayed. 
-Finally, the top ten most important features are identified and stored in a data frame.
+Finally, the top ten most important features are identified and stored.
 
 ## Model 1
 ```{r}
