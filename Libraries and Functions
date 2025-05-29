@@ -1,3 +1,8 @@
+---
+title: "Libraries and Functions"
+---
+
+
 # Load packages
 ```{r}
 library(e1071)
