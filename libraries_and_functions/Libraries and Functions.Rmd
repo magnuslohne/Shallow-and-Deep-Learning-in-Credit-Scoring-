@@ -19,6 +19,7 @@ library(dplyr)
 library(corrplot)
 library(ggplot2)
 library(naniar)
+library(utils)
 ```
 
 # Custom functions
