@@ -1,4 +1,9 @@
-# Shallow and Deep Learning in Credit Scoring - Master's Thesis
+# Shallow and Deep Learning in Credit Scoring
+## Overview
+
+This repository contains all code and analysis used for the Master's thesis.
+It includes data preprocessing, model training, evaluation, and interpretation. 
+In addition, the code for generating plots and performing statistical tests are included. 
 
 ## Project Structure
 
