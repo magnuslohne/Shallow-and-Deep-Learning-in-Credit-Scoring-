@@ -5,21 +5,21 @@ title: "Libraries and Functions"
 
 # Required libraries
 ```{r}
+library(corrplot)
+library(DescTools)
+library(dplyr)
 library(e1071)
+library(ggplot2)
+library(iml)
+library(naniar)
 library(pROC)
 library(PRROC)
-library(DescTools)
-library(iml)
 library(randomForest)
+library(readxl)
+library(reticulate)
+library(utils)
 library(xgboost)
 library(xtable)
-library(reticulate)
-library(readxl)
-library(dplyr)
-library(corrplot)
-library(ggplot2)
-library(naniar)
-library(utils)
 ```
 
 # Custom functions
