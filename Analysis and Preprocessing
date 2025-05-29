@@ -2,6 +2,12 @@
 title: "Analysis and Preprocessing"
 ---
 
+# Import data
+```{r}
+data <- read_excel("data.xlsx", col_names = FALSE)
+head(data)
+```
+
 # Removing redundant features
 ```{r}
 data <- data[,-c(18,22)]
@@ -43,11 +49,6 @@ data$Households <- (data$Households - mean(data$Households)) / sd(data$Household
 # Normalise Sector
 data$Sector <- as.numeric(data$Sector)
 data$Sector <- (data$Sector - mean(data$Sector)) / sd(data$Sector)
-```
-# Import data
-```{r}
-data <- read_excel("export_etter_norm.xlsx", col_names = FALSE)
-head(data)
 ```
 
 # Correlation plot of features
