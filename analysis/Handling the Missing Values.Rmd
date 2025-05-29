@@ -2,7 +2,6 @@
 title: "Handling the Missing Values"
 ---
 
-library(naniar)
 mcar_test(data)
 
 data_naAnalysis <- data
