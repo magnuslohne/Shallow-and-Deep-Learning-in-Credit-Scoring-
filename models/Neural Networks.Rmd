@@ -9,12 +9,10 @@ Third, the test set performance is computed and confusion matrix is displayed.
 Finally, the top ten most important features are identified and stored.
 
 Note: Restarting R session / copying the script and running in python or another
-.Rmd script might be necessary to run this section. The rest of this script 
-runs in an Anaconda environment (r-tensorflow) using the reticulate package to 
-interface between R and Python. Ensure that the correct Conda environment is 
-activated before execution, and restart the R session if switching environments.
-If TensorFlow or Keras is not recognized, verify the installation within the 
-r-tensorflow environment.
+.Rmd script might be necessary to run this section. It runs in an Anaconda environment (r-tensorflow) using 
+the reticulate package to interface between R and Python. Ensure that the correct Conda environment is 
+activated before execution, and restart the R session if switching environments. If TensorFlow or Keras is 
+not recognized, verify the installation within the r-tensorflow environment.
 
 
 ## Activate anaconda environment and load libraries/packages
