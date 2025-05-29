@@ -1,5 +1,5 @@
 # Function
-chi_sq_compare_factors <- function(pos_df, neg_list, factor_vars) {
+chisq_compare_factors <- function(pos_df, neg_list, factor_vars) {
   results <- list()
   
   for (var in factor_vars) {
@@ -24,5 +24,16 @@ chi_sq_compare_factors <- function(pos_df, neg_list, factor_vars) {
 
 
 # Example usage
+pos_df <- data.frame(test_set[which(test_set$Response == 1), ])
+npos <- nrow(pos_df)
+
+neg_df1 <- data.frame(test_set[which(test_set$Response == 0), ])
+neg_df2 <- data.frame(test_set[sample(which(test_set$Response == 0), npos), ])
+neg_list <- list(
+  neg_1 = neg_df1,
+  neg_2 = neg_df2
+)
 
 factor_feats <- c("Factor_1", "Factor_2")
+
+chisq_p_values_list <- chisq_compare_factors(pos_df, neg_list, factor_feats)
