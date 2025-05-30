@@ -31,9 +31,9 @@ val_metrics_LR_1 <- perf_met_fu(lr_prob_pred1, actual_class_validation)
 start.time <- Sys.time()
 
 LR_2 <- glm(Default_next_12_months ~ Income + Age + Payment_remarks + 
-                Credit_History_Last_12_Months+ Savings_Agreement_Bank + 
-                Mortgage_on_Property + Deposit_TR200000_R5 + Loan_TR1000000_R5 +
-                Wealth_TR2000000_R5, family = "binomial", data = train_set)
+                Credit_History + Savings_Agreement_Bank + 
+                Mortgage_on_Property + Deposit_T + Loan_T +
+                Fortune_T, family = "binomial", data = train_set)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
@@ -51,8 +51,8 @@ val_metrics_LR_2 <- perf_met_fu(lr_prob_pred2, actual_class_validation)
 start.time <- Sys.time()
 
 LR_3 <- glm(Default_next_12_months ~ Income + Age + Payment_remarks + 
-                Credit_History_Last_12_Months + Savings_Agreement_Bank + 
-                Deposit_TR200000_R5 + Loan_TR1000000_R5 + Wealth_TR2000000_R5, 
+                Credit_History + Savings_Agreement_Bank + 
+                Deposit_T + Loan_T + Fortune_T, 
               family = "binomial", data = train_set)
 
 end.time <- Sys.time()
@@ -92,9 +92,9 @@ val_metrics_LR_4 <- perf_met_fu(lr_prob_pred4, actual_class_validation)
 start.time <- Sys.time()
 
 LR_5 <- glm(Default_next_12_months ~ Loan + Income + Age + Payment_remarks + 
-                Wealth + Deposit + Overdue_ammount +
-                Credit_History_Last_12_Months + Overdue_Amount_TR30000_R2 +
-                Deposit_TR200000_R5 + Loan_TR1000000_R5 + Wealth_TR2000000_R5, 
+                Wealth + Deposit + OverdueAmount +
+                Credit_History + OverdueAmount_T +
+                Deposit_T + Loan_T + Fortune_T, 
               family = "binomial", data = train_set)
 
 end.time <- Sys.time()
