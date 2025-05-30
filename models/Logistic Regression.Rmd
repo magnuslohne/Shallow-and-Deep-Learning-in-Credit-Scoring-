@@ -131,7 +131,7 @@ test_metrics_lr <- perf_met_fu(pred = test_prob_pred_LR, actual = actual_class_t
 optimal_threshold_LR <- opt_thres_fu(test_prob_pred_LR, actual_class_test)
 test_class_pred_LR <- ifelse(test_prob_pred_LR > as.numeric(optimal_threshold_LR)[1], 1, 0)
 
-confusion_matrix_LR <- cm_fu(predicted_class_LR, actual_class_test)
+confusion_matrix_LR <- cm_fu(test_class_pred_LR, actual_class_test)
 print(confusion_matrix_LR)
 ```
 
