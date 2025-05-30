@@ -164,7 +164,8 @@ test_metrics_NN <- perf_met_fu(test_prob_pred_NN, actual_class_test)
 print(paste0("ROC-AUC: ", test_metrics_NN[1], ", PR-AUC: ", test_metrics_NN[2], ", Brier score: ", test_metrics_NN[3]))
 
 optimal_threshold_NN <- opt_thres_fu(test_prob_pred_NN, actual_class_test)
-test_NN_class_pred <- ifelse(test_prob_pred_NN > as.numeric(optimal_threshold_NN)[1], 1, 0)
+test_prob_pred_NN <- ifelse(test_prob_pred_NN > as.numeric(optimal_threshold_NN)[1], 1, 0)
+
 confusion_matrix_NN <- cm_fu(test_NN_class_pred, actual_class_test)
 print(confusion_matrix_NN)
 ```
