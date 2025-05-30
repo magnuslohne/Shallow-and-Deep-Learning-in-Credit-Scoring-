@@ -120,9 +120,9 @@ test_metrics_RF <- perf_met_fu(test_prob_pred_RF, actual_class_test)
 print(paste0("ROC-AUC: ", test_metrics_RF[1], ", PR-AUC: ", test_metrics_RF[2], ", Brier score: ", test_metrics_RF[3]))
 
 optimal_threshold_RF <- opt_thres_fu(test_prob_pred_RF, actual_class_test)
-test_RF_class_pred <- ifelse(test_prob_pred_RF > as.numeric(optimal_threshold_RF)[1], 1, 0)
+test_class_pred_RF <- ifelse(test_prob_pred_RF > as.numeric(optimal_threshold_RF)[1], 1, 0)
 
-confusion_matrix_RF <- cm_fu(test_RF_class_pred, actual_class_test)
+confusion_matrix_RF <- cm_fu(test_class_pred_RF, actual_class_test)
 print(confusion_matrix_RF)
 ```
 
