@@ -6,7 +6,6 @@ wilcox_compare_numfeatures <- function(pos_df, neg_list, num_vars) {
   for (var in num_vars) {
     p_vals_l <- c()
     p_vals_g <- c()
-    alt_h_list <- c()
 
     for (neg_df in neg_list) {
       test_result <- wilcox.test(pos_df[[var]], neg_df[[var]], alternative = "greater")
