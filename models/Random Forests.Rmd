@@ -15,14 +15,14 @@ Finally, the top ten most important features are identified and stored.
 start.time <- Sys.time()
 
 set.seed(123)
-rfmod1 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
+RF_1 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
 mtry = 4, importance = TRUE, do.trace = 100, n_tree=100)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 print(time.taken)
 
-rf_prob_pred1 <- predict(rfmod1, newdata=validation_set, "prob")[1:nrow(validation_set)]
+rf_prob_pred1 <- predict(RF_1, newdata=validation_set, "prob")[1:nrow(validation_set)]
 rf_prob_pred1 <- 1 - rf_prob_pred1 #flipped probabilities
 
 val_metrics_rf1 <- perf_met_fu(rf_prob_pred1, actual_class_validation)
@@ -36,14 +36,14 @@ val_metrics_rf1 <- perf_met_fu(rf_prob_pred1, actual_class_validation)
 set.seed(123)
 start.time <- Sys.time()
 
-rfmod2 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
+RF_2 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
 mtry = 4, importance = TRUE, do.trace = 100, n_tree=200)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-rf_prob_pred2 <- predict(rfmod2, newdata=validation_set, "prob")[1:nrow(validation_set)]
+rf_prob_pred2 <- predict(RF_2, newdata=validation_set, "prob")[1:nrow(validation_set)]
 rf_prob_pred2 <- 1 - rf_prob_pred2
 val_metrics_rf2 <- perf_met_fu(rf_prob_pred2, actual_class_validation)
 ```
@@ -58,14 +58,14 @@ class_weights <- c(`0` = 1, `1` = 50) #use weights to put emphasis on minority c
 
 start.time <- Sys.time()
 
-rfmod3 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
+RF_3 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
 mtry = 6, importance = TRUE, do.trace = 100, n_tree=100, classwt = class_weights)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-rf_prob_pred3 <- predict(rfmod3, newdata=validation_set, "prob")[1:nrow(validation_set)]
+rf_prob_pred3 <- predict(RF_3, newdata=validation_set, "prob")[1:nrow(validation_set)]
 rf_prob_pred3 <- 1 - rf_prob_pred3
 val_metrics_rf3 <- perf_met_fu(rf_prob_pred3, actual_class_validation)
 ```
@@ -80,14 +80,14 @@ class_weights <- c(`0` = 1, `1` = 20) # new class weights
 start.time <- Sys.time()
 
 set.seed(123)
-rfmod4 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
+RF_4 <- randomForest(as.factor(Default_next_12_months) ~ ., data = train_set,
 mtry = 6, importance = TRUE, do.trace = 100, n_tree=100, classwt = class_weights)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-rf_prob_pred4 <- predict(rfmod4, newdata=validation_set, "prob")[1:nrow(validation_set)]
+rf_prob_pred4 <- predict(RF_4, newdata=validation_set, "prob")[1:nrow(validation_set)]
 rf_prob_pred4 <- 1 - rf_prob_pred4
 val_metrics_rf4 <- perf_met_fu(rf_prob_pred4, actual_class_validation)
 ```
@@ -113,7 +113,7 @@ print(results_tableRF)
 
 ## Performance on test set
 ```{r}
-test_prob_pred_RF <- predict(rfmod1, newdata=test_set, "prob")[1:nrow(test_set)]
+test_prob_pred_RF <- predict(RF_1, newdata=test_set, "prob")[1:nrow(test_set)]
 test_prob_pred_RF <- 1 - test_prob_pred_RF
 
 test_metrics_RF <- perf_met_fu(test_prob_pred_RF, actual_class_test)
@@ -131,7 +131,7 @@ print(confusion_matrix_RF)
 ## Interpretability/Variable importance
 
 ```{r}
-var_imp_RF <- as.data.frame(randomForest::importance(rfmod1))[,c(3,4)]
+var_imp_RF <- as.data.frame(randomForest::importance(RF_1))[,c(3,4)]
 var_imp_RF <- head(var_imp_RF[order(var_imp_RF$MeanDecreaseGini, decreasing = TRUE), ], 10)
 
 print(var_imp_RF)
