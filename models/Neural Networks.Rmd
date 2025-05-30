@@ -53,7 +53,7 @@ y_test  <- as.numeric(unlist(test_set[,1]))
 set.seed(123) 
 tensorflow::set_random_seed(123)
 
-NNmodel1 <- keras_model_sequential() %>%
+NN_1 <- keras_model_sequential() %>%
   layer_dense(units = 64, activation = "relu", input_shape = ncol(X_train)) %>%
   layer_dropout(rate = 0.3) %>%
   layer_dense(units = 32, activation = "relu") %>%
@@ -61,7 +61,7 @@ NNmodel1 <- keras_model_sequential() %>%
   layer_dense(units = 16, activation = "relu") %>%
   layer_dense(units = 1, activation = "sigmoid")
 
-NNmodel1 %>% compile(
+NN_1 %>% compile(
   optimizer = optimizer_adam(learning_rate = 0.001),
   loss = "binary_crossentropy",
   metrics = list(metric_auc())
@@ -71,7 +71,7 @@ class_weights <- list("0" = 1, "1" = 50) # weights to handle class imbalance
 
 start.time <- Sys.time()
 
-history1 <- NNmodel1 %>% fit(
+history1 <- NN_1 %>% fit(
   x = X_train,
   y = y_train,
   epochs = 50,
@@ -84,7 +84,7 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-NN_prob_pred1 <- NNmodel1 %>% predict(X_val)
+NN_prob_pred1 <- NN_1 %>% predict(X_val)
 NN_prob_pred1 <- as.vector(NN_prob_pred1)
 
 val_metrics_NN1 <- perf_met_fu(NN_prob_pred1, actual_class_validation)
@@ -98,7 +98,7 @@ val_metrics_NN1 <- perf_met_fu(NN_prob_pred1, actual_class_validation)
 set.seed(123)  
 tensorflow::set_random_seed(123)
 
-NNmodel2 <- keras_model_sequential() %>%
+NN_2 <- keras_model_sequential() %>%
   layer_dense(units = 128, activation = "relu", input_shape = ncol(X_train)) %>%
   layer_dropout(rate = 0.3) %>%
   layer_dense(units = 64, activation = "relu") %>%
@@ -106,7 +106,7 @@ NNmodel2 <- keras_model_sequential() %>%
   layer_dense(units = 32, activation = "relu") %>%
   layer_dense(units = 1, activation = "sigmoid")
 
-NNmodel2 %>% compile(
+NN_2 %>% compile(
   optimizer = optimizer_adam(learning_rate = 0.002),
   loss = "binary_crossentropy",
   metrics = list(metric_auc())
@@ -117,7 +117,7 @@ class_weights <- list("0" = 2, "1" = 50)
 start.time <- Sys.time()
 
 set.seed(123)
-history2 <- NNmodel2 %>% fit(
+history2 <- NN_2 %>% fit(
   x = X_train,
   y = y_train,
   epochs = 50,
@@ -130,7 +130,7 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-NN_prob_pred2 <- NNmodel2 %>% predict(X_val)
+NN_prob_pred2 <- NN_2 %>% predict(X_val)
 NN_prob_pred2 <- as.vector(NN_prob_pred2)
 val_metrics_NN2 <- perf_met_fu(NN_prob_pred2, actual_class_validation)
 ```
@@ -157,7 +157,7 @@ print(results_tableNN)
 ## Performance on test set
 
 ```{r}
-test_prob_pred_NN <- NNmodel1 %>% predict(X_test)
+test_prob_pred_NN <- NN_1 %>% predict(X_test)
 test_prob_pred_NN <- as.vector(test_prob_pred_NN)
 
 test_metrics_NN <- perf_met_fu(test_prob_pred_NN, actual_class_test)
@@ -184,7 +184,7 @@ nondef <- sample(which(y_train==0), size=900)
 background_data <- X_train_py[c(def,nondef), ]
 
 shap <- import("shap")
-explainor_NN <- shap$DeepExplainer(NNmodel1, background_data)
+explainor_NN <- shap$DeepExplainer(NN_1, background_data)
 shap_values_NN <- explainor_NN$shap_values(X_test_py) 
 
 shap_matrix <- as.matrix(shap_values_NN[[1]])
