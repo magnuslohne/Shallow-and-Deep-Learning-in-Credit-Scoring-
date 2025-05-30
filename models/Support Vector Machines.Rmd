@@ -13,14 +13,14 @@ Finally, the top ten most important features are identified and stored.
 set.seed(123)
 start.time <- Sys.time()
 
-svmmod1 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
+SVM_1 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
               type="C-classification", cost = 100, probability = TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-svm_pred1 <- predict(svmmod1, newdata=validation_set, probability = TRUE)
+svm_pred1 <- predict(SVM_1, newdata=validation_set, probability = TRUE)
 svm_prob_pred1 <- attr(svm_pred1, "probabilities")[,2]
 
 val_metrics_svm1 <- perf_met_fu(svm_prob_pred1, actual_class_validation)
@@ -33,7 +33,7 @@ val_metrics_svm1 <- perf_met_fu(svm_prob_pred1, actual_class_validation)
 set.seed(123)
 start.time <- Sys.time()
 
-svmmod2 = svm(Default_next_12_months ~ ., data = train_set, 
+SVM_2 = svm(Default_next_12_months ~ ., data = train_set, 
               kernel = "polynomial", degree=3, type="C-classification", 
               cost = 20, probability = TRUE)
 
@@ -41,7 +41,7 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-svm_pred2 <- predict(svmmod2, newdata=validation_set, probability = TRUE)
+svm_pred2 <- predict(SVM_2, newdata=validation_set, probability = TRUE)
 svm_prob_pred2 <- attr(svm_pred2, "probabilities")[,2]
 
 val_metrics_svm2 <- perf_met_fu(svm_prob_pred2, actual_class_validation)
@@ -56,14 +56,14 @@ val_metrics_svm2[1] <- 1- val_metrics_svm2[1] #curve was flipped for some reason
 set.seed(123)
 start.time <- Sys.time()
 
-svmmod3 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
+SVM_3 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial", 
               type="C-classification", cost = 10, probability = TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-svm_pred3 <- predict(svmmod3, newdata=validation_set, probability = TRUE)
+svm_pred3 <- predict(SVM_3, newdata=validation_set, probability = TRUE)
 svm_prob_pred3 <- attr(svm_pred3, "probabilities")[,2]
 
 val_metrics_svm3 <- perf_met_fu(svm_prob_pred3, actual_class_validation)
@@ -78,14 +78,14 @@ val_metrics_svm3 <- perf_met_fu(svm_prob_pred3, actual_class_validation)
 set.seed(123)
 start.time <- Sys.time()
 
-svmmod4 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial",
+SVM_4 = svm(Default_next_12_months ~ ., data = train_set, kernel = "radial",
               type="C-classification", cost = 50, probability = TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-svm_pred4 <- predict(svmmod4, newdata=validation_set, probability = TRUE)
+svm_pred4 <- predict(SVM_4, newdata=validation_set, probability = TRUE)
 svm_prob_pred4 <- attr(svm_pred4, "probabilities")[,2]
 
 val_metrics_svm4 <- perf_met_fu(svm_prob_pred4, actual_class_validation)
@@ -113,7 +113,7 @@ results_tableSVM
 ## Performance on test set
 
 ```{r}
-test_pred_SVM <- predict(svmmod1, newdata=test_set, probability = TRUE)
+test_pred_SVM <- predict(SVM_1, newdata=test_set, probability = TRUE)
 test_prob_pred_SVM <- attr(test_pred_SVM, "probabilities")[,2]
 
 test_metrics_svm <- perf_met_fu(test_prob_pred_SVM, actual_class_test)
@@ -132,7 +132,7 @@ print(confusion_matrix_SVM)
 X_test_SVM <- test_set[, -1]
 
 set.seed(123)
-predictor_SVM <- Predictor$new(svmmod1, data = X_test_SVM, 
+predictor_SVM <- Predictor$new(SVM_1, data = X_test_SVM, 
                            y = test_set$Default_next_12_months, type = "prob")
 
 imp_SVM <- FeatureImp$new(predictor_SVM, loss = "ce") # cross-entropy loss 
