@@ -17,7 +17,7 @@ ncol(data)
 
 # Names
 ```{r}
-colnames(data) <- c("Default_next_12_months", "Loan", "Age", "Income", "Wealth", "Deposit", "Overdue_ammount", "Payment_remarks", "Sole_proprietorship", "Credit_History_Last_12_Months", "Savings_Agreement_Bank", "Savings_Agreement_Fund", "Sector", "Mortgage_on_Property", "Deposit_TR200000_R5", "Overdue_Amount_TR30000_R2", "Loan_TR1000000_R5", "Wealth_TR2000000_R5", "Mortgage_Savings", "Households")
+colnames(data) <- c("Default_next_12_months", "Loan", "Age", "Income", "Fortune", "Deposit", "OverdueAmount", "Payment_remarks", "Sole_proprietorship", "Credit_History", "Savings_Agreement_Bank", "Savings_Agreement_Fund", "Sector", "Mortgage_on_Property", "Deposit_T", "OverdueAmount_T", "Loan_T", "Fortune_T", "Mortgage_Savings", "Households")
 
 head(data)
 summary(data)
