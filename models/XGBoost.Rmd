@@ -43,7 +43,7 @@ params <- list(
 )
 
 set.seed(123)
-xgbmod1 <- xgb.train(
+XGB_1 <- xgb.train(
   params = params,
   data = dtrain,
   watchlist = list(train = dtrain, val = dval),
@@ -56,7 +56,7 @@ end.time = Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-xgb_prob_pred1 <- predict(xgbmod1, dval)
+xgb_prob_pred1 <- predict(XGB_1, dval)
 val_metrics_xgb1 <- perf_met_fu(xgb_prob_pred1, actual_class_validation)
 ```
 
@@ -82,7 +82,7 @@ params2 <- list(
 )
 
 set.seed(123)
-xgbmod2 <- xgb.train(
+XGB_2 <- xgb.train(
   params = params2,
   data = dtrain,
   nrounds = 100,
@@ -95,7 +95,7 @@ end.time = Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-xgb_prob_pred2 <- predict(xgbmod2, dval)
+xgb_prob_pred2 <- predict(XGB_2, dval)
 val_metrics_xgb2 <- perf_met_fu(xgb_prob_pred2, actual_class_validation)
 ```
 
@@ -119,7 +119,7 @@ params3 <- list(
 )
 
 set.seed(123)
-xgbmod3 <- xgb.train(
+XGB_3 <- xgb.train(
   params = params3,
   data = dtrain,
   nrounds = 100,
@@ -132,7 +132,7 @@ end.time = Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-xgb_prob_pred3 <- predict(xgbmod3, dval)
+xgb_prob_pred3 <- predict(XGB_3, dval)
 val_metrics_xgb3 <- perf_met_fu(xgb_prob_pred3, actual_class_validation)
 ```
 
@@ -154,7 +154,7 @@ params4 <- list(
 )
 
 set.seed(123)
-xgbmod4 <- xgb.train(
+XGB_4 <- xgb.train(
   params = params4,
   data = dtrain,
   nrounds = 100,
@@ -167,7 +167,7 @@ end.time = Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
-xgb_prob_pred4 <- predict(xgbmod4, dval)
+xgb_prob_pred4 <- predict(XGB_4, dval)
 val_metrics_xgb4 <- perf_met_fu(xgb_prob_pred4, actual_class_validation)
 ```
 
@@ -190,14 +190,14 @@ print(results_tableXGB)
 
 ## Predictions on test set
 ```{r}
-test_prob_pred_XGB <- predict(xgbmod1, dtest)
+test_prob_pred_XGB <- predict(XGB_1, dtest)
 test_metrics_xgb <- perf_met_fu(test_prob_pred_XGB, actual_class_test)
 print(paste0("ROC-AUC: ", test_metrics_xgb[1], ", PR-AUC: ", test_metrics_xgb[2], ", Brier score: ", test_metrics_xgb[3]))
 
 optimal_threshold_XGB <- opt_thres_fu(test_prob_pred_XGB, actual_class_test)
-test_xgb_class_pred <- ifelse(test_prob_pred_XGB > as.numeric(optimal_threshold_XGB)[1], 1, 0)
+test_class_pred_XGB <- ifelse(test_prob_pred_XGB > as.numeric(optimal_threshold_XGB)[1], 1, 0)
 
-confusion_matrix_XGB <- cm_fu(test_xgb_class_pred, actual_class_test)
+confusion_matrix_XGB <- cm_fu(test_class_pred_XGB, actual_class_test)
 print(confusion_matrix_XGB)
 ```
 
@@ -206,6 +206,6 @@ print(confusion_matrix_XGB)
 ## Interpretability/Variable importance
 
 ```{r}
-importance_matrix_XGB <- head(as.matrix(xgb.importance(model = xgbmod1)), 10)
+importance_matrix_XGB <- head(as.matrix(xgb.importance(model = XGB_1)), 10)
 print(importance_matrix_XGB)
 ```
